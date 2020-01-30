@@ -1,0 +1,149 @@
+package com.MrSoftIt.class9_10allbook;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.material.navigation.NavigationView;
+
+public class WebViewActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+
+
+    ProgressBar progressBar;
+    public DrawerLayout drawer1;
+    private InterstitialAd mInterstitialAd;
+
+    private AdView mAdView;
+
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_web_view);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_support);
+        toolbar.setTitle("নবম ও দশম শ্রেণির পাঠ্যপুস্তক");
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+      //  getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+
+        progressBar = findViewById(R.id.progress_circular_wev);
+
+        WebView webView = (WebView) findViewById(R.id.webview);
+
+        mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+        // TODO: Add adView to your view hierarchy.
+
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {}
+        });
+
+
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId(getString(R.string.interstitial_id));
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+
+        mInterstitialAd.setAdListener(new AdListener() {
+            public void onAdLoaded() {
+                showInterstitial();
+            }
+        });
+
+        if (MainActivity.InternetConnection.checkConnection(WebViewActivity.this)) {
+
+            WebSettings webSettings = webView.getSettings();
+            webSettings.setJavaScriptEnabled(true);
+            webView.loadUrl("http://www.educationboardresults.gov.bd/");
+            progressBar.setVisibility(View.GONE);
+
+            AdView adView = new AdView(this);
+            adView.setAdSize(AdSize.BANNER);
+            adView.setAdUnitId(getString(R.string.Banner_id));
+
+            MobileAds.initialize(this, new OnInitializationCompleteListener() {
+                @Override
+                public void onInitializationComplete(InitializationStatus initializationStatus) {
+                }
+            });
+
+         } else {
+            // Not Available...
+            Toast.makeText(this, " No Internet ", Toast.LENGTH_LONG).show();
+
+
+        }
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent homeIntnt =new Intent(WebViewActivity.this,MainActivity.class);
+                startActivity(homeIntnt);
+                finish();
+            }
+        });
+
+
+
+    }
+
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.nav_message:
+
+                Intent homeIntnt =new Intent(WebViewActivity.this,MainActivity.class);
+                startActivity(homeIntnt);
+                break;
+            case R.id.nav_chat:
+                Intent resultIntnt =new Intent(WebViewActivity.this,WebViewActivity.class);
+                startActivity(resultIntnt);
+
+                break;
+            case R.id.nav_profile:
+                Toast.makeText(this, "text   .....", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.nav_share:
+                Toast.makeText(this, "Share", Toast.LENGTH_SHORT).show();
+                break;
+
+        }
+
+        drawer1.closeDrawer(GravityCompat.START);
+        return true;
+    }
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    private void showInterstitial() {
+        if (mInterstitialAd.isLoaded()) {
+            mInterstitialAd.show();
+        }
+    }
+}
