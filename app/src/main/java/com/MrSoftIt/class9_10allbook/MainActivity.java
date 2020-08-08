@@ -22,14 +22,9 @@ import android.widget.Toast;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 
 
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.flurry.android.FlurryAgent;
+import com.flurry.android.FlurryPerformance;
+
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -42,16 +37,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout drawer;
 
     private BookAdapter adapter;
-    private AdView mAdView;
-    private InterstitialAd mInterstitialAd;
+
+
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     CollectionReference collectionReference = db.collection("users");
-
-
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,41 +65,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
         // TODO: Add adView to your view hierarchy.
 
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {}
-        });
-        mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId(getString(R.string.interstitial_id));
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
-        if (InternetConnection.checkConnection(MainActivity.this)) {
+        new FlurryAgent.Builder()
+                .withDataSaleOptOut(false) //CCPA - the default value is false
+                .withCaptureUncaughtExceptions(true)
+                .withIncludeBackgroundSessionsInMetrics(true)
+                .withPerformanceMetrics(FlurryPerformance.ALL)
+                .build(this,"MHNDFHMZ75GJ5R2635VP");
 
-
-            AdView adView = new AdView(this);
-            adView.setAdSize(AdSize.BANNER);
-            adView.setAdUnitId(getString(R.string.Banner_id));
-
-            MobileAds.initialize(this, new OnInitializationCompleteListener() {
-                @Override
-                public void onInitializationComplete(InitializationStatus initializationStatus) {
-                }
-            });
-
-
-
-
-
-        } else {
-            // Not Available...
-            Toast.makeText(this, " No Internet ", Toast.LENGTH_LONG).show();
-
-        }
 
 
         recyclear();
@@ -187,21 +152,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.nav_share:
                 Intent resultIntnt2 =new Intent(MainActivity.this,AboutActivity.class);
-                if (mInterstitialAd.isLoaded()) {
-                    mInterstitialAd.show();
-                } else {
-
-                }
                 startActivity(resultIntnt2);
 
-                mInterstitialAd.setAdListener(new AdListener() {
-                    @Override
-                    public void onAdClosed() {
-                        // Load the next interstitial.
-                        mInterstitialAd.loadAd(new AdRequest.Builder().build());
-                    }
-
-                });
                 break;
 
         }

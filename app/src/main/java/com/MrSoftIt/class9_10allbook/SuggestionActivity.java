@@ -13,14 +13,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -36,8 +29,7 @@ public class SuggestionActivity extends AppCompatActivity {
     private SuggetionAdapter suggetionAdapter;
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private AdView mAdView;
-    private InterstitialAd mInterstitialAd;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)  {
@@ -61,43 +53,13 @@ public class SuggestionActivity extends AppCompatActivity {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+
         // TODO: Add adView to your view hierarchy.
 
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {}
-        });
-        mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId(getString(R.string.interstitial_id));
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
-
-        mInterstitialAd.setAdListener(new AdListener() {
-            public void onAdLoaded() {
-                showInterstitial();
-            }
-        });
 
 
-        if (MainActivity.InternetConnection.checkConnection(SuggestionActivity.this)) {
 
 
-            AdView adView = new AdView(this);
-            adView.setAdSize(AdSize.BANNER);
-            adView.setAdUnitId(getString(R.string.Banner_id));
-
-            MobileAds.initialize(this, new OnInitializationCompleteListener() {
-                @Override
-                public void onInitializationComplete(InitializationStatus initializationStatus) {
-                }
-            });
-
-        } else {
-            // Not Available...
-            Toast.makeText(this, " No Internet ", Toast.LENGTH_LONG).show();
-        }
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -157,9 +119,5 @@ public class SuggestionActivity extends AppCompatActivity {
         suggetionAdapter.stopListening();
     }
 
-    private void showInterstitial() {
-        if (mInterstitialAd.isLoaded()) {
-            mInterstitialAd.show();
-        }
-    }
+
 }

@@ -8,6 +8,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.app.DownloadManager;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -30,16 +31,11 @@ import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
 import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
 import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
@@ -65,10 +61,8 @@ public class PdfActivity extends AppCompatActivity implements EasyPermissions.Pe
 
     private View view;
 
-    ProgressBar progressBar;
-    private InterstitialAd mInterstitialAd;
+    ProgressDialog progressDialog;
 
-    private AdView mAdView;
 
     FirebaseStorage storage = FirebaseStorage.getInstance();
     StorageReference storageRef = storage.getReference();
@@ -77,6 +71,8 @@ public class PdfActivity extends AppCompatActivity implements EasyPermissions.Pe
     String PDF;
     String BookName;
     int PageNumber;
+
+    ProgressBar progressBar;
 
     TextView offline;
     String path = Environment.getExternalStorageDirectory() + "/Class9-10";
@@ -91,9 +87,9 @@ public class PdfActivity extends AppCompatActivity implements EasyPermissions.Pe
 
 
         pdfView = findViewById(R.id.pdfView);
+        progressBar = findViewById(R.id.progress_circular);
 
         offline = findViewById(R.id.ofline_id);
-        progressBar = findViewById(R.id.progress_circular);
 
         Bundle bundle = getIntent().getExtras();
 
@@ -102,55 +98,21 @@ public class PdfActivity extends AppCompatActivity implements EasyPermissions.Pe
         PDF = bundle.getString("PDF");
 
         PageNumber = bundle.getInt("PageNumber");
-       // PageNumber1 = Integer.parseInt(PageNumber1);
+        // PageNumber1 = Integer.parseInt(PageNumber1);
 
         BookName = bundle.getString("BookName");
 
         toolbar.setTitle("নবম ও দশম শ্রেণির "+BookName);
 
-        mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
-        // TODO: Add adView to your view hierarchy.
-
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {}
-        });
 
 
-        mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId(getString(R.string.interstitial_id));
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
-        mInterstitialAd.setAdListener(new AdListener() {
-            public void onAdLoaded() {
-                showInterstitial();
-            }
-        });
 
 
 
         getPath();
 
         displayFromUri();
-
-        if (MainActivity.InternetConnection.checkConnection(PdfActivity.this)) {
-
-            AdView adView = new AdView(this);
-            adView.setAdSize(AdSize.BANNER);
-            adView.setAdUnitId(getString(R.string.Banner_id));
-
-            MobileAds.initialize(this, new OnInitializationCompleteListener() {
-                @Override
-                public void onInitializationComplete(InitializationStatus initializationStatus) {
-                }
-            });
-        } else {
-            // Not Available...
-            Toast.makeText(this, " No Internet ", Toast.LENGTH_LONG).show();
-
-        }
 
         offline.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -171,21 +133,18 @@ public class PdfActivity extends AppCompatActivity implements EasyPermissions.Pe
         File file = new File(path);
         if (!file.exists()) {
             file.mkdir();
-            Toast.makeText(this, "Folder Create" +
-                    file.getPath(), Toast.LENGTH_SHORT).show();
+
         }
         return path;
     }
 
     public void dwnld(Context context, String pdfUrl1, String name) {
 
-
         File direct = new File("/Class9-10/pdf");
 
         if (!direct.exists()) {
             direct.mkdirs();
         }
-
 
         // Create request for android download manager
         DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
@@ -200,7 +159,7 @@ public class PdfActivity extends AppCompatActivity implements EasyPermissions.Pe
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 
         request.setDestinationInExternalPublicDir("/Class9-10/pdf/", name+".pdf");
-        
+
         request.setMimeType("*/*");
         downloadManager.enqueue(request);
     }
@@ -215,6 +174,7 @@ public class PdfActivity extends AppCompatActivity implements EasyPermissions.Pe
                 .getAbsolutePath()
                 + "/Class9-10/pdf/"+BookName+".pdf");
 
+
         if (file.exists() && pdfView != null) {
             offline.setVisibility(View.GONE);
 
@@ -222,16 +182,15 @@ public class PdfActivity extends AppCompatActivity implements EasyPermissions.Pe
                     .defaultPage(PageNumber)
                     .enableSwipe(true)
                     .load();
-            progressBar.setVisibility(View.GONE);
         }
         else {
             offline.setVisibility(View.VISIBLE);
 
-            Toast.makeText(this, "Online View ", Toast.LENGTH_SHORT).show();
 
-            if(PDF==null){
-                Toast.makeText(this, " not Pdf Link", Toast.LENGTH_SHORT).show();
-            }
+
+
+
+
             storage.getReferenceFromUrl(PDF)
                     .getBytes(900000000)
                     .addOnSuccessListener(new OnSuccessListener<byte[]>() {
@@ -239,14 +198,15 @@ public class PdfActivity extends AppCompatActivity implements EasyPermissions.Pe
                         public void onSuccess(byte[] bytes) {
 
                             pdfView.fromBytes(bytes)
-
                                     .defaultPage(PageNumber)
                                     .enableSwipe(true) // allows to block changing pages using swipe
                                     .swipeHorizontal(false)
                                     .enableDoubletap(true)
                                     .load();
-                                   progressBar.setVisibility(View.GONE);
+
+                            progressBar.setVisibility(View.GONE);
                         }
+
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
@@ -254,6 +214,8 @@ public class PdfActivity extends AppCompatActivity implements EasyPermissions.Pe
                             Toast.makeText(PdfActivity.this, e.toString(), Toast.LENGTH_LONG).show();
                         }
                     });
+
+
         }
     }
     @AfterPermissionGranted(123)
@@ -263,7 +225,7 @@ public class PdfActivity extends AppCompatActivity implements EasyPermissions.Pe
             if (MainActivity.InternetConnection.checkConnection(PdfActivity.this)) {
                 // Its Available...
 
-                  dwnld(PdfActivity.this,PDF,BookName);
+                dwnld(PdfActivity.this,PDF,BookName);
 
             } else {
                 // Not Available...
@@ -271,7 +233,7 @@ public class PdfActivity extends AppCompatActivity implements EasyPermissions.Pe
 
             }
 
-             
+
         } else {
             EasyPermissions.requestPermissions(this, "We need storage permissions ",
                     123, perms);
@@ -290,7 +252,7 @@ public class PdfActivity extends AppCompatActivity implements EasyPermissions.Pe
     @Override
     public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
 
-          dwnld(PdfActivity.this,PDF,BookName);
+        dwnld(PdfActivity.this,PDF,BookName);
 
     }
 
@@ -312,10 +274,5 @@ public class PdfActivity extends AppCompatActivity implements EasyPermissions.Pe
     }
 
 
-    private void showInterstitial() {
-        if (mInterstitialAd.isLoaded()) {
-            mInterstitialAd.show();
-        }
-    }
 
 }

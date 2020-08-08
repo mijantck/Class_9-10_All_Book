@@ -13,12 +13,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -30,7 +25,7 @@ public class ChaptersActivity extends AppCompatActivity {
     String id;
     String BookName;
 
-    private AdView mAdView;
+
 
     private ChapterAdapter Chapteradapter;
 
@@ -55,27 +50,11 @@ public class ChaptersActivity extends AppCompatActivity {
         toolbar.setTitle("নবম ও দশম শ্রেণির পাঠ্যপুস্তক");
 
 
-        mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
-        // TODO: Add adView to your view hierarchy.
 
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {}
-        });
 
         if (MainActivity.InternetConnection.checkConnection(ChaptersActivity.this)) {
 
-            AdView adView = new AdView(this);
-            adView.setAdSize(AdSize.BANNER);
-            adView.setAdUnitId(getString(R.string.Banner_id));
 
-            MobileAds.initialize(this, new OnInitializationCompleteListener() {
-                @Override
-                public void onInitializationComplete(InitializationStatus initializationStatus) {
-                }
-            });
 
         } else {
             // Not Available...
@@ -104,8 +83,6 @@ public class ChaptersActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(Chapteradapter);
-
-
 
 
         Chapteradapter.setOnItemClickListener(new ChapterAdapter.OnItemClickListener(){

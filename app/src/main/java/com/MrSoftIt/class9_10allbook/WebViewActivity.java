@@ -15,14 +15,6 @@ import android.webkit.WebView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.material.navigation.NavigationView;
 
 public class WebViewActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -31,10 +23,6 @@ public class WebViewActivity extends AppCompatActivity implements NavigationView
 
     ProgressBar progressBar;
     public DrawerLayout drawer1;
-    private InterstitialAd mInterstitialAd;
-
-    private AdView mAdView;
-
 
 
     @Override
@@ -53,50 +41,10 @@ public class WebViewActivity extends AppCompatActivity implements NavigationView
 
         WebView webView = (WebView) findViewById(R.id.webview);
 
-        mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
-        // TODO: Add adView to your view hierarchy.
-
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {}
-        });
 
 
-        mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId(getString(R.string.interstitial_id));
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
-
-        mInterstitialAd.setAdListener(new AdListener() {
-            public void onAdLoaded() {
-                showInterstitial();
-            }
-        });
-
-        if (MainActivity.InternetConnection.checkConnection(WebViewActivity.this)) {
-
-            WebSettings webSettings = webView.getSettings();
-            webSettings.setJavaScriptEnabled(true);
-            webView.loadUrl("http://www.educationboardresults.gov.bd/");
-            progressBar.setVisibility(View.GONE);
-
-            AdView adView = new AdView(this);
-            adView.setAdSize(AdSize.BANNER);
-            adView.setAdUnitId(getString(R.string.Banner_id));
-
-            MobileAds.initialize(this, new OnInitializationCompleteListener() {
-                @Override
-                public void onInitializationComplete(InitializationStatus initializationStatus) {
-                }
-            });
-
-         } else {
-            // Not Available...
-            Toast.makeText(this, " No Internet ", Toast.LENGTH_LONG).show();
 
 
-        }
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,9 +89,4 @@ public class WebViewActivity extends AppCompatActivity implements NavigationView
         return true;
     }
 
-    private void showInterstitial() {
-        if (mInterstitialAd.isLoaded()) {
-            mInterstitialAd.show();
-        }
-    }
 }
