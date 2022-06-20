@@ -6,30 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".PdfActivity"
     android:orientation="vertical"
-    android:gravity="center"
-
-    >
+    android:gravity="center">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_support"
         android:layout_width="match_parent"
-        app:titleTextColor="#ffff"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimary"
-        >
-        <TextView
-            android:id="@+id/ofline_id"
-            android:gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="OFFLINE"
-            android:padding="5dp"
-            android:textSize="15dp"
-            android:textColor="#fff"
-            android:textStyle="bold"
-            android:background="#E90B0B"
-            android:layout_marginLeft="10dp"
-            />
+        app:titleTextColor="#ffff">
 
     </androidx.appcompat.widget.Toolbar>
 
@@ -38,14 +22,6 @@
         android:id="@+id/pdfView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
-    <ProgressBar
-        android:id="@+id/progress_circular"
-        android:layout_below="@id/toolbar_support"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-
-
 
 
 </RelativeLayout>
